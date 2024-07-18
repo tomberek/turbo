@@ -15,24 +15,30 @@
         fi
         set -x
 
-        if found_PATH=$(${pkgs.findutils.locate}/bin/locate -d locate.db --follow --existing --wholename '/nix/*/bin/'"$1" --limit 1); then 
+        if found_PATH=$(${pkgs.findutils.locate}/bin/locate -d locate.db --follow --existing --wholename '/nix/*/bin/'"$1" --limit 1); then
          :
         else
           ${pkgs.findutils.locate}/bin/updatedb --localpaths="/nix/var/nix/profiles/* /nix/var/nix/gcroots/* /nix/store" --findoptions='-mindepth 3 -maxdepth 3 -name .links -prune -o -follow -path "/nix/*/bin/*"' --output=$HOME/.cache/turbo/locate.db &> /dev/null
           found_PATH=$(${pkgs.findutils.locate}/bin/locate -d locate.db --follow --existing --wholename '/nix/*/bin/'"$1" --limit 1)
         fi
+
+        # TODO: alos add rest of store
         # ${pkgs.findutils.locate}/bin/updatedb --localpaths="/nix/store" --findoptions='-mindepth 3 -maxdepth 3 -name .links -prune -o -follow -path "/nix/*/bin/*"' --output=$HOME/.cache/turbo/locate.db &
 
         if [ -f "$found_PATH" ]; then
-          nix profile install "$found_PATH" --profile ~/.cache/turbo/"$1"
+          nix --extra-experimental-features 'nix-command' \
+            profile install "$found_PATH" --profile ~/.cache/turbo/"$1"
           echo "saved: $found_PATH" >&2
           shift
           exec "$found_PATH" "$@"
         fi
 
-        #found_NAME="$(nix-locate /bin/"$1"  --whole-name  --at-root | awk '{print $4}' | awk -F'[/-]' '{print $5}')"
         echo "cannot find: $1" >&2
-        nix-locate /bin/"$1"  --whole-name  --at-root
+        echo "let's run nix-locate for you" >&2
+        ${pkgs.nix-index}/bin/nix-locate /bin/"$1"  --whole-name  --at-root
+
+        # TODO: suggest a package to install
+        #found_NAME="$(nix-locate /bin/"$1"  --whole-name  --at-root | awk '{print $4}' | awk -F'[/-]' '{print $5}')"
         exit 42
       '';
     }) _.nixpkgs.legacyPackages;
