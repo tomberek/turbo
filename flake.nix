@@ -2,34 +2,51 @@
   inputs.nixpkgs.url = "github:NixOS/nixpkgs";
   outputs = _: {
     packages = builtins.mapAttrs (system: pkgs: {
+      script = pkgs.runCommand "g-script" {
+        _locate = pkgs.findutils.locate;
+        _nix_index = pkgs.nix-index;
+      } ''
+        substituteAll ${./g.sh} $out/bin/g
+        patchShebang $out/bin/g
+      '';
       default = pkgs.writeShellScriptBin "g" ''
         mkdir -p ~/.cache/turbo
-        if found_PATH=$(command -v "$1"); then
+
+        save_and_run(){
+          nix --extra-experimental-features 'nix-command' \
+            profile install "$found_PATH" --profile ~/.cache/turbo/"$1"
+          shift
           echo "in path: $found_PATH" >&2
-          exec "$@"
+          exec "$found_PATH" "$@"
+        }
+
+        if found_PATH=$(command -v "$1"); then
+          save_and_run "$@"
         fi
+
         PATH=~/.cache/turbo/"$1"/bin:$PATH
         if found_PATH=$(command -v "$1"); then
-          echo "in turbo: $found_PATH" >&2
-          exec "$@"
+          save_and_run "$@"
         fi
 
-        if found_PATH=$(${pkgs.findutils.locate}/bin/locate -d locate.db --follow --existing --wholename '/nix/*/bin/'"$1" --limit 1); then
+        if found_PATH=$(${pkgs.findutils.locate}/bin/locate -d ~/.cache/turbo/locate.db --follow --existing --wholename '/nix/*/bin/'"$1" --limit 1); then
          :
         else
-          ${pkgs.findutils.locate}/bin/updatedb --localpaths="/nix/var/nix/profiles/* /nix/var/nix/gcroots/* /nix/store" --findoptions='-mindepth 3 -maxdepth 3 -name .links -prune -o -follow -path "/nix/*/bin/*"' --output=$HOME/.cache/turbo/locate.db &> /dev/null
-          found_PATH=$(${pkgs.findutils.locate}/bin/locate -d locate.db --follow --existing --wholename '/nix/*/bin/'"$1" --limit 1)
+          ${pkgs.findutils.locate}/bin/updatedb \
+            --localpaths="/nix/var/nix/profiles/* /nix/var/nix/gcroots/* /nix/store" \
+            --findoptions='-mindepth 3 -maxdepth 3 -name .links -prune -o -follow -path "/nix/*/bin/*"' \
+            --output=$HOME/.cache/turbo/locate.db &> /dev/null
+
+          found_PATH=$(${pkgs.findutils.locate}/bin/locate \
+            -d $HOME/.cache/turbo/locate.db \
+            --follow --existing --wholename '/nix/*/bin/'"$1" --limit 1)
         fi
 
-        # TODO: alos add rest of store
+        # TODO: also add rest of store
         # ${pkgs.findutils.locate}/bin/updatedb --localpaths="/nix/store" --findoptions='-mindepth 3 -maxdepth 3 -name .links -prune -o -follow -path "/nix/*/bin/*"' --output=$HOME/.cache/turbo/locate.db &
 
         if [ -f "$found_PATH" ]; then
-          nix --extra-experimental-features 'nix-command' \
-            profile install "$found_PATH" --profile ~/.cache/turbo/"$1"
-          echo "saved: $found_PATH" >&2
-          shift
-          exec "$found_PATH" "$@"
+          save_and_run "$@"
         fi
 
         echo "cannot find: $1" >&2
