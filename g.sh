@@ -28,7 +28,7 @@ if [ -e "$HOME"/.cache/turbo/locate.db ] && found_PATH=$("$_locate"/bin/locate \
 	save_and_run "$@"
 else
   "$_locate"/bin/updatedb \
-    --localpaths="/nix/var/nix/profiles/* /nix/var/nix/gcroots/* /nix/store" \
+    --localpaths="/nix/var/nix/profiles/* /nix/var/nix/gcroots/*" \
     --findoptions='-mindepth 3 -maxdepth 3 -name .links -prune -o -follow -path "/nix/*/bin/*"' \
     --output="$HOME"/.cache/turbo/locate.db &> /dev/null
 fi
