@@ -13,7 +13,6 @@
           echo "in turbo: $found_PATH" >&2
           exec "$@"
         fi
-        set -x
 
         if found_PATH=$(${pkgs.findutils.locate}/bin/locate -d locate.db --follow --existing --wholename '/nix/*/bin/'"$1" --limit 1); then
          :
