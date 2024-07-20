@@ -16,3 +16,7 @@ Note: searches in your Nix store profiles and gcroots.
 
 ## Maintenance
 The resolved packages/binaries are cached into ~/.cache/turbo, so you can remove all of those to reset them.
+
+## Credits
+@nicklewis
+@ysndr
