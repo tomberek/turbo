@@ -2,15 +2,16 @@
   "nodes": {
     "nixpkgs": {
       "locked": {
-        "lastModified": 1721278768,
-        "narHash": "sha256-pbYQ+TMrSarrrslW/Ku6nm/IOWb6e/rWDd11rEqGkLU=",
+        "lastModified": 1721379653,
+        "narHash": "sha256-8MUgifkJ7lkZs3u99UDZMB4kbOxvMEXQZ31FO3SopZ0=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "02bc99fddf9f4283099462d8be34063d9441ba29",
+        "rev": "1d9c2c9b3e71b9ee663d11c5d298727dace8d374",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
+        "ref": "nixos-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -24,15 +25,16 @@
     "tracelinks": {
       "flake": false,
       "locked": {
-        "lastModified": 1708465171,
-        "narHash": "sha256-fFktNKw11mNTZiuh+L59nlMbnWyzehWmkCoCZgRZO4Y=",
+        "lastModified": 1721507821,
+        "narHash": "sha256-RraqV9GoL73K0sw+uuGq9N9wrZQkNClmObM+PL5WEMI=",
         "owner": "flox",
         "repo": "tracelinks",
-        "rev": "59467f715fd9aade7259b3077384b1610d8c0458",
+        "rev": "49c4dda962e61d334bd10fc1594e4efaed27fc80",
         "type": "github"
       },
       "original": {
         "owner": "flox",
+        "ref": "tomberek.minimal",
         "repo": "tracelinks",
         "type": "github"
       }

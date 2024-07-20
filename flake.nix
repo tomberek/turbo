@@ -1,12 +1,15 @@
 {
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs";
-  inputs.tracelinks.url = "github:flox/tracelinks";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs.tracelinks.url = "github:flox/tracelinks/tomberek.minimal";
   inputs.tracelinks.flake = false;
 
   outputs = _: {
     packages = builtins.mapAttrs (system: pkgs: rec {
+
+      # grab the recipe for tracelinks directly
       tracelinks = pkgs.callPackage (_.tracelinks + "/pkgs/tracelinks") {self=_.tracelinks;};
-      script = pkgs.runCommand "g" {
+
+      turbo = pkgs.runCommand "g" {
         buildInputs = [ pkgs.makeWrapper ];
       } ''
         mkdir -p $out/bin
@@ -21,7 +24,7 @@
         ln -s $out/bin/g $out/bin/321
         ln -s $out/bin/g $out/bin/'$'
       '';
-      default = script;
+      default = turbo;
     }) _.nixpkgs.legacyPackages;
   };
 }
