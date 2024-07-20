@@ -17,7 +17,24 @@
     },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "tracelinks": "tracelinks"
+      }
+    },
+    "tracelinks": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1708465171,
+        "narHash": "sha256-fFktNKw11mNTZiuh+L59nlMbnWyzehWmkCoCZgRZO4Y=",
+        "owner": "flox",
+        "repo": "tracelinks",
+        "rev": "59467f715fd9aade7259b3077384b1610d8c0458",
+        "type": "github"
+      },
+      "original": {
+        "owner": "flox",
+        "repo": "tracelinks",
+        "type": "github"
       }
     }
   },

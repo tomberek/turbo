@@ -3,14 +3,17 @@ mkdir -p ~/.cache/turbo
 
 _locate=${_locate:-@locate@}
 _nix_index=${_nix_index:-@nix-index@}
+_tracelinks=${_tracelinks:-@tracelinks@}
+_gum=${_gum:-@gum@}
 
 save_and_run(){
   dir=$(dirname "$found_PATH")
   dir=$(dirname "$dir")
   nix --extra-experimental-features 'nix-command' \
     build "$dir" --no-link --profile "$HOME"/.cache/turbo/"$1"
+  echo "found: $1" >&2
+  "$_tracelinks"/bin/tracelinks "$found_PATH" >&2
   shift
-  echo "running: $found_PATH" >&2
   exec "$found_PATH" "$@"
 }
 
@@ -50,6 +53,8 @@ echo "cannot find: $1" >&2
 echo "let's run nix-locate for you" >&2
 
 # TODO: suggest a package to install
-"$_nix_index"/bin/nix-locate /bin/"$1"  --whole-name  --at-root
-	#| awk '{print $4}' | awk -F'[/-]' '{print $5}')"
+SELECTION=$("$_nix_index"/bin/nix-locate /bin/"$1"  --whole-name  --at-root | $_gum/bin/gum choose | cut -d' ' -f1 )
+found_PATH=$(nix build nixpkgs#"$SELECTION" --print-out-paths)/bin/"$1"
+save_and_run "$@"
+
 exit 42
