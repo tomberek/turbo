@@ -1,10 +1,14 @@
-# turbo, aka: `g`, `321`, `my`
+# turbo, aka: `g`, `321`, `$`, `my`
 
 Finds a copy, *any copy*, of that binary on your machine, and runs it.
 
 Example:
 ```shell
 $ g hello
+Hello World!
+$ 321 hello
+Hello World!
+$ $ hello
 Hello World!
 ```
 

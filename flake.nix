@@ -17,6 +17,9 @@
           --subst-var-by gum ${pkgs.gum}
         chmod +x $out/bin/g
         patchShebangs $out/bin/g
+        ln -s $out/bin/g $out/bin/turbo
+        ln -s $out/bin/g $out/bin/321
+        ln -s $out/bin/g $out/bin/'$'
       '';
       default = script;
     }) _.nixpkgs.legacyPackages;
