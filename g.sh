@@ -113,12 +113,8 @@ run() {
     exec "$found_PATH" "${args[@]}"
 }
 
-if found_PATH=$(PATH="$HOME"/.cache/turbo/"$command"/bin command -v "$command"); then
+if found_PATH=$(PATH="$HOME"/.cache/turbo/"$command"/bin:"$PATH" command -v "$command"); then
     run
-fi
-
-if found_PATH=$(command -v "$command"); then
-    save_and_run
 fi
 
 _locate_run() {
