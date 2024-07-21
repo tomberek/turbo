@@ -22,7 +22,10 @@ _sed=${_sed//@/}
 
 _d="$(
     "$_docopts" -O -V - -h - : "$@" <<'EOF' || true
-Search and run a binary
+Search for and run a binary
+
+Command:
+  <command>   Run <command> with <args>
 
 Usage:
   g [options] ( local  | l ) [<args>]...
@@ -32,10 +35,10 @@ Usage:
   g [options] <command> [<args>]...
 
 Subcommands:
-  local   Find file in local db
-  remote  Find file using nix-locate
-  index   Index paths (/nix/store, /nix/var/nix/profiles/*)
-  clear   Clear cache at ~/.cache/turbo
+  local       Find file in local db
+  remote      Find file using nix-locate
+  index       Index paths (/nix/store, /nix/var/nix/profiles/*)
+  clear       Clear cache at ~/.cache/turbo
 
 Options:
   -m, --minimal        Minimal output
