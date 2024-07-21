@@ -20,19 +20,20 @@ _sed=${_sed//@/}
 : "${local=} ${remote=} ${index=} ${clear=} ${minimal=}"
 : "${debug=} ${command=} ${args=}"
 
+_basename="${0##*/}"
 _d="$(
-    "$_docopts" -O -V - -h - : "$@" <<'EOF' || true
+    "$_docopts" -O -V - -h - : "$@" <<EOF || true
 Search for and run a binary
 
 Command:
   <command>   Run <command> with <args>
 
 Usage:
-  g [options] ( local  | l ) [<args>]...
-  g [options] ( remote | r ) [<args>]...
-  g [options] ( index  | i ) [<args>]...
-  g ( clear | c )
-  g [options] <command> [<args>]...
+  $_basename [options] ( local  | l ) [<args>]...
+  $_basename [options] ( remote | r ) [<args>]...
+  $_basename [options] ( index  | i ) [<args>]...
+  $_basename ( clear | c )
+  $_basename [options] <command> [<args>]...
 
 Subcommands:
   local       Find file in local db

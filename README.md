@@ -4,9 +4,7 @@ Finds a copy, *any copy*, of that binary on your machine, and runs it. The idea 
 
 ## Example
 ```shell
-$ g hello
-Hello World!
-$ $ hello
+$ $ -m hello
 Hello World!
 $ $ python3
 INFO /nix/var/nix/gcroots/auto/107x662c7phh7k0rpm1ki4g7j8w847ck ->
@@ -21,18 +19,23 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 ## Usage
 ```
-Search and run a binary
+Search for and run a binary
+
+Command:
+  <command>   Run <command> with <args>
 
 Usage:
-  g [options] ( local | remote | index ) <arg>...
-  g clear
-  g [options] <command> [<args>]...
+  $_basename [options] ( local  | l ) [<args>]...
+  $_basename [options] ( remote | r ) [<args>]...
+  $_basename [options] ( index  | i ) [<args>]...
+  $_basename ( clear | c )
+  $_basename [options] <command> [<args>]...
 
 Subcommands:
-  local   Find file in local db
-  remote  Find file using nix-locate
-  index   Index paths (/nix/store, /nix/var/nix/profiles/*)
-  clear   Clear cache at ~/.cache/turbo
+  local       Find file in local db
+  remote      Find file using nix-locate
+  index       Index paths (/nix/store, /nix/var/nix/profiles/*)
+  clear       Clear cache at ~/.cache/turbo
 
 Options:
   -m, --minimal        Minimal output
