@@ -2,63 +2,140 @@
 mkdir -p "$HOME"/.cache/turbo
 
 _locate=${_locate:-@locate@}
-_nix_index=${_nix_index:-@nix-index@}
+_locate=${_locate//@/}
+_updatedb=${_updatedb:-@updatedb@}
+_updatedb=${_updatedb//@/}
+_nix_locate=${_nix_locate:-@nix-locate@}
+_nix_locate=${_nix_locate//@/}
 _tracelinks=${_tracelinks:-@tracelinks@}
+_tracelinks=${_tracelinks//@/}
 _gum=${_gum:-@gum@}
+_gum=${_gum//@/}
+_docopts=${_docopts:-@docopts@}
+_docopts=${_docopts//@/}
+
+local=
+remote=
+index=
+clear=
+minimal=
+
+_d="$("$_docopts" -O -V - -h - : "$@" <<'EOF'
+Search and run a binary
+
+Usage:
+  g [options] ( local | remote | index ) <arg>...
+  g clear
+  g [options] <command> [<args>]...
+
+Subcommands:
+  local   Find file in local db
+  remote  Find file using nix-locate
+  index   Index paths (/nix/store, /nix/var/nix/profiles/*)
+  clear   Clear cache at ~/.cache/turbo
+
+Options:
+  -m, --minimal        Minimal output
+  -d, --debug          Debug output
+  -h, --help           Show this screen
+  -v, --version        Print version
+
+----
+g 0.1.0
+Copyright (C) 2024 Thomas Bereknyei
+EOF
+)"
+eval "$_d"
+if [ "$debug" = "true" ]; then
+  echo "$_d"
+  set -x
+fi
+
+if [ "$local" = "true" ]; then
+  "$_locate" \
+    -d "$HOME"/.cache/turbo/locate.db \
+    --follow --existing "${arg[@]}"
+  exit $?
+fi
+
+if [ "$remote" = "true" ]; then
+  if [ "$minimal" = "true" ]; then
+    arg=("--minimal" "${arg[@]}")
+  fi
+  "$_nix_locate" "${arg[@]}"
+  exit $?
+fi
+
+if [ "$index" = "true" ]; then
+  "$_gum" spin \
+    --show-error --spinner dot --title "Indexing '${arg[*]}'" -- \
+    "$_updatedb" \
+      --localpaths="${arg[*]}" \
+      --findoptions='-mindepth 3 -maxdepth 3 -name .links -prune -o -follow -path "/nix/*/bin/*"' \
+      --output="$HOME"/.cache/turbo/locate.db
+  exit $?
+fi
+
+# shellcheck disable=SC2154
+if [ "$clear" = "true" ]; then
+  rm -rf "$HOME"/.cache/turbo
+  exit 0
+fi
 
 save_and_run(){
   dir=$(dirname "$found_PATH")
   dir=$(dirname "$dir")
   nix --extra-experimental-features 'nix-command' \
-    build "$dir" --no-link --profile "$HOME"/.cache/turbo/"$1"
-  while IFS= read -r line; do
-    "$_gum"/bin/gum log --level info -- "$line"
-  done < <("$_tracelinks"/bin/tracelinks -m "$found_PATH")
+    build "$dir" --no-link --profile "$HOME"/.cache/turbo/"$command"
+  # shellcheck disable=SC2154
+  if [ "$minimal" = "false" ]; then
+    while IFS= read -r line; do
+      "$_gum" log --level info -- "$line"
+    done < <("$_tracelinks" -m "$found_PATH")
+  fi
   shift
-  exec "$found_PATH" "$@"
+  exec "$found_PATH" "${args[@]}"
 }
 
-if found_PATH=$(command -v "$1"); then
-  save_and_run "$@"
+if found_PATH=$(command -v "$command"); then
+  save_and_run
 fi
 
-if found_PATH=$(PATH="$HOME"/.cache/turbo/"$1"/bin:$PATH command -v "$1"); then
-  save_and_run "$@"
+if found_PATH=$(PATH="$HOME"/.cache/turbo/"$command"/bin:$PATH command -v "$command"); then
+  save_and_run
 fi
 
-if [ -e "$HOME"/.cache/turbo/locate.db ] && found_PATH=$("$_locate"/bin/locate \
-		-d "$HOME"/.cache/turbo/locate.db \
-		--follow --existing --wholename '/nix/*/bin/'"$1" --limit 1); then
-	save_and_run "$@"
+_locate_run(){
+  found_PATH=$("$_locate" \
+    -d "$HOME"/.cache/turbo/locate.db \
+    --follow --existing --wholename '/nix/*/bin/'"$command" --limit 1) && [ -n "$found_PATH" ]
+  return $?
+}
+if [ -e "$HOME"/.cache/turbo/locate.db ] && _locate_run; then
+  save_and_run
 else
-  "$_gum"/bin/gum spin --show-output --spinner dot --title "Searching in gcroots and profiles" -- \
-  "$_locate"/bin/updatedb \
+  "$_gum" spin --spinner dot --title "Searching in gcroots and profiles" -- \
+  "$_updatedb" \
     --localpaths="/nix/var/nix/profiles/* /nix/var/nix/gcroots/*" \
     --findoptions='-mindepth 3 -maxdepth 3 -name .links -prune -o -follow -path "/nix/*/bin/*"' \
-    --output="$HOME"/.cache/turbo/locate.db &> /dev/null
+    --output="$HOME"/.cache/turbo/locate.db
 fi
 
-if found_PATH=$("$_locate"/bin/locate \
-	  -d "$HOME"/.cache/turbo/locate.db \
-	  --follow --existing --wholename '/nix/*/bin/'"$1" --limit 1); then
+if _locate_run "$@"; then
   save_and_run "$@"
 fi
 
-# TODO: also add rest of store
-# ${pkgs.findutils.locate}/bin/updatedb --localpaths="/nix/store" --findoptions='-mindepth 3 -maxdepth 3 -name .links -prune -o -follow -path "/nix/*/bin/*"' --output=$HOME/.cache/turbo/locate.db &
+"$_gum" log --level info -- "cannot find: $command"
+"$_gum" log --level info -- "let's run nix-locate for you"
 
-#if [ -e "$found_PATH" ]; then
-  #save_and_run "$@"
-#fi
+SELECTION=$("$_nix_locate" /bin/"$command"  --whole-name  --at-root | "$_gum" choose | cut -d' ' -f1 )
+if [ -n "$SELECTION" ] && [ "$SELECTION" != "no" ] ; then
+  found_PATH=$("$_gum" spin \
+    --show-output --show-error --spinner dot --title "Fetching '$SELECTION' from nixpkgs" \
+    -- nix -L --extra-experimental-features 'nix-command flakes' \
+    build --no-link nixpkgs\#"$SELECTION" --print-out-paths | head -n1)/bin/"$command"
+  save_and_run "$@"
+fi
 
-"$_gum"/bin/gum log --level info -- "cannot find: $1"
-"$_gum"/bin/gum log --level info -- "let's run nix-locate for you"
-
-SELECTION=$("$_nix_index"/bin/nix-locate /bin/"$1"  --whole-name  --at-root | $_gum/bin/gum choose | cut -d' ' -f1 )
-found_PATH=$("$_gum"/bin/gum spin \
-	--show-output --spinner dot --title "Fetching '$SELECTION' from nixpkgs" \
-	-- nix --extra-experimental-features 'nix-command flakes' \
-	build --no-link nixpkgs\#"$SELECTION" --print-out-paths | head -n1)/bin/"$1"
-save_and_run "$@"
-
-exit 42
+"$_gum" log --level error -- "cannot find: $command"
+exit 1

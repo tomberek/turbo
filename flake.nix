@@ -14,10 +14,12 @@
       } ''
         mkdir -p $out/bin
         substitute ${./g.sh} $out/bin/g \
-          --subst-var-by locate ${pkgs.findutils.locate} \
-          --subst-var-by nix-index ${pkgs.nix-index} \
-          --subst-var-by tracelinks ${tracelinks} \
-          --subst-var-by gum ${pkgs.gum}
+          --subst-var-by locate ${pkgs.findutils.locate}/bin/locate \
+          --subst-var-by updatedb ${pkgs.findutils.locate}/bin/updatedb \
+          --subst-var-by nix-locate ${pkgs.nix-index}/bin/nix-locate \
+          --subst-var-by tracelinks ${tracelinks}/bin/tracelinks \
+          --subst-var-by docopts ${pkgs.docopts}/bin/docopts \
+          --subst-var-by gum ${pkgs.gum}/bin/gum
         chmod +x $out/bin/g
         patchShebangs $out/bin/g
         ln -s $out/bin/g $out/bin/turbo
