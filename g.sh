@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 mkdir -p "$HOME"/.cache/turbo
 
 _locate=${_locate:-@locate@}
@@ -19,12 +20,15 @@ remote=
 index=
 clear=
 minimal=
+debug=
+command=
+args=
 
 _d="$("$_docopts" -O -V - -h - : "$@" <<'EOF'
 Search and run a binary
 
 Usage:
-  g [options] ( local | remote | index ) <arg>...
+  g [options] ( local | remote | index ) <args>...
   g clear
   g [options] <command> [<args>]...
 
@@ -54,23 +58,23 @@ fi
 if [ "$local" = "true" ]; then
   "$_locate" \
     -d "$HOME"/.cache/turbo/locate.db \
-    --follow --existing "${arg[@]}"
+    --follow --existing "${args[@]}"
   exit $?
 fi
 
 if [ "$remote" = "true" ]; then
   if [ "$minimal" = "true" ]; then
-    arg=("--minimal" "${arg[@]}")
+    args=("--minimal" "${args[@]}")
   fi
-  "$_nix_locate" "${arg[@]}"
+  "$_nix_locate" "${args[@]}"
   exit $?
 fi
 
 if [ "$index" = "true" ]; then
   "$_gum" spin \
-    --show-error --spinner dot --title "Indexing '${arg[*]}'" -- \
+    --show-error --spinner dot --title "Indexing '${args[*]}'" -- \
     "$_updatedb" \
-      --localpaths="${arg[*]}" \
+      --localpaths="${args[*]}" \
       --findoptions='-mindepth 3 -maxdepth 3 -name .links -prune -o -follow -path "/nix/*/bin/*"' \
       --output="$HOME"/.cache/turbo/locate.db
   exit $?
@@ -93,7 +97,6 @@ save_and_run(){
       "$_gum" log --level info -- "$line"
     done < <("$_tracelinks" -m "$found_PATH")
   fi
-  shift
   exec "$found_PATH" "${args[@]}"
 }
 

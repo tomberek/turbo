@@ -10,7 +10,12 @@
       tracelinks = pkgs.callPackage (_.tracelinks + "/pkgs/tracelinks") {self=_.tracelinks;};
 
       turbo = pkgs.runCommand "g" {
-        buildInputs = [ pkgs.makeWrapper ];
+        buildInputs = [
+          pkgs.makeWrapper
+          pkgs.docopts
+          pkgs.findutils.locate
+          pkgs.gum
+        ];
       } ''
         mkdir -p $out/bin
         substitute ${./g.sh} $out/bin/g \
