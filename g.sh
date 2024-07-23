@@ -7,6 +7,8 @@ _updatedb=${_updatedb:-@updatedb@}
 _updatedb=${_updatedb//@/}
 _nix_locate=${_nix_locate:-@nix-locate@}
 _nix_locate=${_nix_locate//@/}
+_nix_index=${_nix_index:-@nix-index@}
+_nix_index=${_nix_index//@/}
 _tracelinks=${_tracelinks:-@tracelinks@}
 _tracelinks=${_tracelinks//@/}
 _gum=${_gum:-@gum@}
@@ -139,6 +141,9 @@ fi
 
 "$_gum" log --level info -- "cannot find: $command"
 "$_gum" log --level info -- "let's run nix-locate for you"
+if [ ! -e "$HOME"/.cache/nix-index/files ]; then
+    "$_gum" spin --show-output --show-error --spinner dot --title "Indexing" -- "$_nix_index"
+fi
 
 SELECTION=$("$_nix_locate" /bin/"$command" --whole-name --at-root | "$_gum" choose | cut -d' ' -f1)
 if [ -n "$SELECTION" ] && [ "$SELECTION" != "no" ]; then
