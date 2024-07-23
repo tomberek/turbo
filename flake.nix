@@ -32,6 +32,7 @@
               --subst-var-by locate ${pkgs.findutils.locate}/bin/locate \
               --subst-var-by updatedb ${pkgs.findutils.locate}/bin/updatedb \
               --subst-var-by nix-locate ${pkgs.nix-index}/bin/nix-locate \
+              --subst-var-by nix-index ${pkgs.nix-index}/bin/nix-index \
               --subst-var-by tracelinks ${tracelinks}/bin/tracelinks \
               --subst-var-by docopts ${pkgs.docopts}/bin/docopts \
               --subst-var-by sed ${pkgs.gnused}/bin/sed \

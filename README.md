@@ -46,7 +46,6 @@ Options:
 
 ## Search Precedence
 - searches in `~/.cache/turbo/*/bin`
-- searches in $PATH
 - searches in `~/.cache/turbo/locate.db`
 - generates `~/.cache/turbo/locate.db` by indexing from:
     - /nix/var/nix/profiles
