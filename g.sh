@@ -143,6 +143,11 @@ fi
 "$_gum" log --level info -- "let's run nix-locate for you"
 if [ ! -e "$HOME"/.cache/nix-index/files ]; then
     "$_gum" spin --show-output --show-error --spinner dot --title "Indexing" -- "$_nix_index"
+    _exit=$?
+    if [ $_exit -ne 0 ]; then
+        "$_gum" log --level error -- "indexing failed"
+        exit "$_exit"
+    fi
 fi
 
 SELECTION=$("$_nix_locate" /bin/"$command" --whole-name --at-root | "$_gum" choose | cut -d' ' -f1)
