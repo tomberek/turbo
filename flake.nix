@@ -4,12 +4,14 @@
   inputs.tracelinks.flake = false;
 
   outputs = _: {
-    packages = builtins.mapAttrs (system: pkgs: rec {
-
-      # grab the recipe for tracelinks directly
-      tracelinks = pkgs.callPackage (_.tracelinks + "/pkgs/tracelinks") { self = _.tracelinks; };
-
+    recipes = {
+      tracelinks = _.tracelinks + "/pkgs/tracelinks";
       turbo =
+        {
+          runCommandNoCC,
+          pkgs,
+          tracelinks,
+        }:
         pkgs.runCommandNoCC "g"
           {
             buildInputs = [
@@ -47,7 +49,13 @@
             shellcheck $out/bin/g
             $out/bin/g --version
           '';
+    };
+    packages = builtins.mapAttrs (system: pkgs: rec {
+
+      tracelinks = pkgs.callPackage _.self.recipes.tracelinks { self = _.tracelinks; };
+      turbo = pkgs.callPackage _.self.recipes.turbo { inherit tracelinks; };
       default = turbo;
+
     }) _.nixpkgs.legacyPackages;
   };
 }
