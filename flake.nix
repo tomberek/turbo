@@ -5,14 +5,14 @@
 
   outputs = _: {
     recipes = {
-      tracelinks = _.tracelinks + "/pkgs/tracelinks";
+      tracelinks = import (_.tracelinks + "/pkgs/tracelinks");
       turbo =
         {
           runCommandNoCC,
           pkgs,
           tracelinks,
         }:
-        pkgs.runCommandNoCC "g"
+        runCommandNoCC "g"
           {
             buildInputs = [
               pkgs.docopts
