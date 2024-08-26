@@ -25,11 +25,11 @@
     "tracelinks": {
       "flake": false,
       "locked": {
-        "lastModified": 1721508388,
-        "narHash": "sha256-mpgWZMpdYI9zSIQoDLyT7AWXUUdce8CWdClEoyzSfMg=",
+        "lastModified": 1724653975,
+        "narHash": "sha256-zszSKuPCNdZJAG71qR32U/1ldmxWK4q2hMwKigpy2UY=",
         "owner": "flox",
         "repo": "tracelinks",
-        "rev": "2793ae430e77042ab5effb5a80b8b27552cd313c",
+        "rev": "391d4fe09163039f2992ff0151e42efc00885153",
         "type": "github"
       },
       "original": {

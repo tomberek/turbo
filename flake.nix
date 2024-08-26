@@ -5,7 +5,7 @@
 
   outputs = _: {
     recipes = {
-      tracelinks = import (_.tracelinks + "/pkgs/tracelinks");
+      tracelinks = ((import (_.tracelinks + "/flake.nix")).outputs { }).recipes.tracelinks;
       turbo =
         {
           runCommandNoCC,
@@ -50,12 +50,17 @@
             $out/bin/g --version
           '';
     };
-    packages = builtins.mapAttrs (system: pkgs: rec {
-
-      tracelinks = pkgs.callPackage _.self.recipes.tracelinks { self = _.tracelinks; };
-      turbo = pkgs.callPackage _.self.recipes.turbo { inherit tracelinks; };
-      default = turbo;
-
-    }) _.nixpkgs.legacyPackages;
+    overlays.default = final: prev: {
+      turbo = final.callPackage _.self.recipes.turbo { };
+      tracelinks = final.callPackage _.self.recipes.tracelinks { };
+      default = final.turbo;
+    };
+    packages = builtins.mapAttrs (
+      system: pkgs:
+      let
+        p = pkgs.lib.makeScope pkgs.newScope (final: _.self.overlays.default final pkgs);
+      in
+      p.packages p
+    ) _.nixpkgs.legacyPackages;
   };
 }
