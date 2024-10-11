@@ -19,7 +19,7 @@ _sed=${_sed:-@sed@}
 _sed=${_sed//@/}
 
 : "${l=} ${r=} ${i=} ${c=}"
-: "${local=} ${remote=} ${index=} ${clear=} ${minimal=}"
+: "${local=} ${remote=} ${index=} ${clear=} ${verbose=}"
 : "${debug=} ${command=} ${args=}"
 
 _basename="${0##*/}"
@@ -44,10 +44,10 @@ Subcommands:
   clear       Clear cache at ~/.cache/turbo
 
 Options:
-  -m, --minimal        Minimal output
+  -v, --verbose        Verbose output
   -d, --debug          Debug output
   -h, --help           Show this screen
-  -v, --version        Print version
+  -V, --version        Print version
 
 ----
 g 0.1.0
@@ -64,16 +64,16 @@ if [[ $local == "true" || $l == "true" ]]; then
     "$_locate" \
         -d "$HOME"/.cache/turbo/locate.db \
         --follow --existing "${args[@]}" |
-        { if [[ ${minimal} == "true" ]]; then
-            $_sed 's#/nix/store/.*[0-9a-z]\{32\}[^-]*-*##g'
+        { if [[ ${verbose} == "true" ]]; then
+            cat 
         else
-            cat
+            $_sed 's#/nix/store/.*[0-9a-z]\{32\}[^-]*-*##g'
         fi; }
     exit $?
 fi
 
 if [[ $remote == "true" || $r == "true" ]]; then
-    if [[ $minimal == "true" ]]; then
+    if [[ $verbose == "false" ]]; then
         args=("--minimal" "${args[@]}")
     fi
     "$_nix_locate" "${args[@]}"
@@ -107,7 +107,7 @@ save_and_run() {
     run
 }
 run() {
-    if [[ $minimal == "false" ]]; then
+    if [[ $verbose == "true" ]]; then
         while IFS= read -r line; do
             "$_gum" log --level info -- "$line"
         done < <("$_tracelinks" -m "$found_PATH")
