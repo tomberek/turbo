@@ -65,7 +65,7 @@ if [[ $local == "true" || $l == "true" ]]; then
         -d "$HOME"/.cache/turbo/locate.db \
         --follow --existing "${args[@]}" |
         { if [[ ${verbose} == "true" ]]; then
-            cat 
+            cat
         else
             $_sed 's#/nix/store/.*[0-9a-z]\{32\}[^-]*-*##g'
         fi; }
