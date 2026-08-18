@@ -5,14 +5,19 @@
 
   outputs = _: {
     recipes = {
-      tracelinks = ((import (_.tracelinks + "/flake.nix")).outputs { }).recipes.tracelinks;
+      tracelinks = {stdenv, help2man}: stdenv.mkDerivation {
+	name = "tracelinks";
+	nativeBuildInputs = [ help2man ];
+	src = _.tracelinks;
+	makeFlags = [ "PREFIX=$(out)" ];
+	};
       turbo =
         {
-          runCommandNoCC,
+          runCommand,
           pkgs,
           tracelinks,
         }:
-        runCommandNoCC "g"
+        runCommand "g"
           {
             buildInputs = [
               pkgs.docopts

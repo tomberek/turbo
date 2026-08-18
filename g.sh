@@ -128,6 +128,7 @@ _locate_run() {
 if [[ -e "$HOME"/.cache/turbo/locate.db ]] && _locate_run; then
     save_and_run
 else
+    mkdir -p "$HOME"/.cache/turbo
     "$_gum" spin --spinner dot --title "Searching in gcroots and profiles" -- \
         "$_updatedb" \
         --localpaths="/nix/var/nix/profiles/* /nix/var/nix/gcroots/*" \
@@ -140,6 +141,7 @@ if _locate_run "$@"; then
 fi
 
 "$_gum" log --level info -- "cannot find: $command"
+"$_gum" log --level info -- "Using NIX_PATH=$NIX_PATH"
 "$_gum" log --level info -- "let's run nix-locate for you"
 if [ ! -e "$HOME"/.cache/nix-index/files ]; then
     "$_gum" spin --show-output --show-error --spinner dot --title "Indexing" -- "$_nix_index"
